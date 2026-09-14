@@ -1,14 +1,93 @@
 {% extends 'base.html' %}
+{% load cinema_extras %}
 
-{% block title %}Dettaglio film &middot; ITS Cinema{% endblock %}
+{% block title %}{% if film %}{{ film.title }}{% else %}Dettaglio film{% endif %} &middot; ITS Cinema{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="alert alert-secondary" role="status">
-    La pagina di dettaglio del film{% if film_id %} (ID {{ film_id }}){% endif %} è in fase di realizzazione.
-  </div>
-  <a href="{% url 'cinema:home' %}" class="btn btn-outline-warning">
+<div class="container py-4">
+  <a href="{% url 'cinema:home' %}" class="btn btn-link link-secondary px-0 mb-3">
     <i class="bi bi-arrow-left me-1"></i>Torna alla programmazione
   </a>
+
+  {% if error %}
+    <div class="alert alert-danger d-flex align-items-center" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}
+    </div>
+  {% else %}
+    <div class="row g-4 align-items-start">
+      <div class="col-12 col-md-4 col-lg-3">
+        <div class="ratio film-poster detail-poster rounded overflow-hidden shadow mx-auto">
+          {% if film.poster_url %}
+            <img src="{{ film.poster_url }}" class="object-fit-cover"
+                 alt="Locandina di {{ film.title }}" referrerpolicy="no-referrer">
+          {% else %}
+            <div class="poster-placeholder d-flex align-items-center justify-content-center">
+              <i class="bi bi-film"></i>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="col-12 col-md-8 col-lg-9">
+        <div class="mb-2">
+          <span class="badge text-bg-warning">{{ film.genre }}</span>
+          {% if film.rating %}<span class="badge text-bg-secondary">{{ film.rating }}</span>{% endif %}
+        </div>
+        <h1 class="display-6 fw-bold">{{ film.title }}</h1>
+
+        <dl class="row mt-3 mb-4">
+          <dt class="col-4 col-sm-3 col-lg-2">Anno</dt>
+          <dd class="col-8 col-sm-9 col-lg-10">{{ film.year }}</dd>
+          <dt class="col-4 col-sm-3 col-lg-2">Durata</dt>
+          <dd class="col-8 col-sm-9 col-lg-10">{{ film.duration|durata }}</dd>
+          <dt class="col-4 col-sm-3 col-lg-2">Regista</dt>
+          <dd class="col-8 col-sm-9 col-lg-10">{{ film.director }}</dd>
+          <dt class="col-4 col-sm-3 col-lg-2">Genere</dt>
+          <dd class="col-8 col-sm-9 col-lg-10">{{ film.genre }}</dd>
+        </dl>
+
+        <h2 class="h5">Trama</h2>
+        <p>{{ film.description }}</p>
+      </div>
+    </div>
+
+    <section class="mt-5" aria-labelledby="spettacoli-title">
+      <h2 id="spettacoli-title" class="h3 mb-3">
+        <i class="bi bi-calendar-event text-warning me-2"></i>Prossimi spettacoli
+      </h2>
+
+      {% for day in screening_days %}
+        <h3 class="h6 text-uppercase text-body-secondary mt-4 mb-3">{{ day.date|date:"l j F Y" }}</h3>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-3">
+          {% for screening in day.screenings %}
+            <div class="col">
+              <div class="card h-100 screening-card{% if screening.seats_status == 'sold_out' %} opacity-50{% endif %}">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fs-3 fw-bold">{{ screening.starts_at|time:"H:i" }}</span>
+                    {% if screening.seats_status == 'sold_out' %}
+                      <span class="badge text-bg-danger">Esaurito</span>
+                    {% elif screening.seats_status == 'low' %}
+                      <span class="badge text-bg-warning">Ultimi posti</span>
+                    {% else %}
+                      <span class="badge text-bg-success">Disponibile</span>
+                    {% endif %}
+                  </div>
+                  <p class="mb-1"><i class="bi bi-door-open me-1"></i>{{ screening.hall.name }}</p>
+                  <p class="small text-body-secondary mb-0">
+                    <i class="bi bi-person me-1"></i>{{ screening.available_seats }}
+                    post{{ screening.available_seats|pluralize:"o,i" }} disponibil{{ screening.available_seats|pluralize:"e,i" }}
+                    su {{ screening.hall.capacity }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% empty %}
+        <div class="alert alert-info" role="status">Non ci sono spettacoli in programma per questo film.</div>
+      {% endfor %}
+    </section>
+  {% endif %}
 </div>
 {% endblock %}

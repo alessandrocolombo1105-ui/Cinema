@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load cinema_extras %}
 
 {% block title %}Film in programmazione &middot; ITS Cinema{% endblock %}
 
@@ -38,7 +39,7 @@
               </div>
               <h2 class="h5 card-title">{{ film.title }}</h2>
               <p class="small text-body-secondary mb-2">
-                {{ film.year }} &middot; {{ film.duration }} min &middot; {{ film.director }}
+                {{ film.year }} &middot; {{ film.duration|durata }} &middot; {{ film.director }}
               </p>
               <p class="card-text small flex-grow-1">{{ film.description|truncatewords:20 }}</p>
               <a href="{% url 'cinema:film_detail' %}?id={{ film.id }}" class="btn btn-warning w-100 mt-2">

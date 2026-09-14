@@ -15,6 +15,21 @@
   font-size: 4rem;
 }
 
+/* Pagina di dettaglio: su mobile la locandina non occupa tutta la larghezza */
+.detail-poster {
+  max-width: 280px;
+}
+
+@media (min-width: 768px) {
+  .detail-poster {
+    max-width: none;
+  }
+}
+
+.screening-card {
+  border-left: 4px solid var(--bs-warning);
+}
+
 .film-card {
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;

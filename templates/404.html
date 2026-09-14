@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Pagina non trovata &middot; ITS Cinema{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center">
+  <i class="bi bi-camera-reels display-1 text-warning"></i>
+  <h1 class="display-6 fw-bold mt-3">Pagina non trovata</h1>
+  <p class="text-body-secondary">Il contenuto che cerchi non esiste o non è più disponibile.</p>
+  <a href="{% url 'cinema:home' %}" class="btn btn-warning">Torna alla programmazione</a>
+</div>
+{% endblock %}

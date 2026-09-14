@@ -3,6 +3,7 @@ from urllib.parse import urljoin
 
 import requests
 from django.conf import settings
+from django.utils.dateparse import parse_datetime
 
 
 class CinemaAPIError(Exception):
@@ -35,3 +36,16 @@ def _get(path, params=None):
 def get_films():
     """GET /films — elenco dei film in programmazione."""
     return _get('films')
+
+
+def get_film(film_id):
+    """GET /films/{id} — dettaglio di un film."""
+    return _get(f'films/{film_id}')
+
+
+def get_film_screenings(film_id):
+    """GET /films/{id}/screenings — spettacoli di un film, con `starts_at` convertito in datetime."""
+    screenings = _get(f'films/{film_id}/screenings')
+    for screening in screenings:
+        screening['starts_at'] = parse_datetime(screening['starts_at'])
+    return screenings
