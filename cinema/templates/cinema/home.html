@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Film in programmazione &middot; ITS Cinema{% endblock %}
+
+{% block content %}
+<section class="hero py-5 mb-4 border-bottom">
+  <div class="container">
+    <h1 class="display-5 fw-bold">Film in programmazione</h1>
+    <p class="lead text-body-secondary mb-0">Scegli il tuo film, scopri gli spettacoli e prenota il tuo posto.</p>
+  </div>
+</section>
+
+<div class="container">
+  {% if error %}
+    <div class="alert alert-danger d-flex align-items-center" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}
+    </div>
+  {% else %}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+      {% for film in films %}
+        <div class="col">
+          <article class="card h-100 film-card shadow-sm">
+            <div class="ratio film-poster">
+              {% if film.poster_url %}
+                <img src="{{ film.poster_url }}" class="card-img-top object-fit-cover"
+                     alt="Locandina di {{ film.title }}" loading="lazy" referrerpolicy="no-referrer">
+              {% else %}
+                <div class="poster-placeholder d-flex align-items-center justify-content-center">
+                  <i class="bi bi-film"></i>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="card-body d-flex flex-column">
+              <div class="mb-2">
+                <span class="badge text-bg-warning">{{ film.genre }}</span>
+                {% if film.rating %}<span class="badge text-bg-secondary">{{ film.rating }}</span>{% endif %}
+              </div>
+              <h2 class="h5 card-title">{{ film.title }}</h2>
+              <p class="small text-body-secondary mb-2">
+                {{ film.year }} &middot; {{ film.duration }} min &middot; {{ film.director }}
+              </p>
+              <p class="card-text small flex-grow-1">{{ film.description|truncatewords:20 }}</p>
+              <a href="{% url 'cinema:film_detail' %}?id={{ film.id }}" class="btn btn-warning w-100 mt-2">
+                Scopri di più
+              </a>
+            </div>
+          </article>
+        </div>
+      {% empty %}
+        <div class="col-12">
+          <div class="alert alert-info" role="status">Nessun film in programmazione al momento.</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

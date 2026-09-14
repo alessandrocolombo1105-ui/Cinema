@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Dettaglio film &middot; ITS Cinema{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="alert alert-secondary" role="status">
+    La pagina di dettaglio del film{% if film_id %} (ID {{ film_id }}){% endif %} è in fase di realizzazione.
+  </div>
+  <a href="{% url 'cinema:home' %}" class="btn btn-outline-warning">
+    <i class="bi bi-arrow-left me-1"></i>Torna alla programmazione
+  </a>
+</div>
+{% endblock %}

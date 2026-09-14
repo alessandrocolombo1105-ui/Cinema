@@ -1,7 +1,10 @@
 from django.urls import path
 
+from . import views
+
 app_name = 'cinema'
 
 urlpatterns = [
-    # Le rotte (homepage, dettaglio film, prenotazione) verranno aggiunte nei prossimi step
+    path('', views.home, name='home'),
+    path('film/', views.film_detail, name='film_detail'),
 ]

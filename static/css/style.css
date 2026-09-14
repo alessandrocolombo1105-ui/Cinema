@@ -1,0 +1,36 @@
+/* Stili personalizzati ITS Cinema (in aggiunta a Bootstrap 5) */
+
+.hero {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), transparent 60%);
+}
+
+/* Locandine in formato 2:3 */
+.film-poster {
+  --bs-aspect-ratio: 150%;
+}
+
+.poster-placeholder {
+  background-color: var(--bs-secondary-bg);
+  color: var(--bs-secondary-color);
+  font-size: 4rem;
+}
+
+.film-card {
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.film-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.35) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .film-card {
+    transition: none;
+  }
+
+  .film-card:hover {
+    transform: none;
+  }
+}
