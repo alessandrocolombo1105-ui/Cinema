@@ -26,11 +26,24 @@ SECRET_KEY = os.environ.get(
     'django-insecure-@z49ku!=h63^%pfo-gv793thxs8fk0!p!4b19z_y=i!owjc3!b',
 )
 
-DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
+# Vercel imposta la variabile VERCEL nei suoi ambienti (produzione e anteprime)
+ON_VERCEL = bool(os.environ.get('VERCEL'))
+
+# In locale il debug è attivo di default, su Vercel è disattivato
+DEBUG = os.environ.get('DJANGO_DEBUG', '0' if ON_VERCEL else '1') == '1'
 
 ALLOWED_HOSTS = [host for host in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if host]
+CSRF_TRUSTED_ORIGINS = [f'https://{host.lstrip(".")}' for host in ALLOWED_HOSTS]
 if DEBUG:
     ALLOWED_HOSTS += ['127.0.0.1', 'localhost']
+if ON_VERCEL:
+    # Domini assegnati da Vercel al progetto (es. nome-progetto.vercel.app e URL delle anteprime)
+    ALLOWED_HOSTS.append('.vercel.app')
+    CSRF_TRUSTED_ORIGINS.append('https://*.vercel.app')
+    # Vercel termina l'HTTPS e inoltra la richiesta a Django indicando il protocollo originale
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 
 # Application definition
@@ -57,6 +70,9 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'config.urls'
+
+# Sessioni salvate in un cookie firmato: non richiedono il database, che su Vercel non è persistente
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 TEMPLATES = [
     {

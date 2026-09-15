@@ -116,10 +116,29 @@ Se PowerShell blocca l'attivazione del virtualenv, esegui una volta:
 | Variabile              | Default                  | Descrizione                                   |
 | ---------------------- | ------------------------ | --------------------------------------------- |
 | `DJANGO_SECRET_KEY`    | chiave di sviluppo       | Chiave segreta, obbligatoria in produzione    |
-| `DJANGO_DEBUG`         | `1`                      | `0` per disattivare la modalità debug         |
+| `DJANGO_DEBUG`         | `1` (`0` su Vercel)      | `0` per disattivare la modalità debug         |
 | `DJANGO_ALLOWED_HOSTS` | vuoto                    | Host consentiti, separati da virgola          |
 
 Con `DJANGO_DEBUG=1` sono sempre consentiti `127.0.0.1` e `localhost`.
+
+## Pubblicazione su Vercel
+
+Il progetto si pubblica su Vercel importando la repository: Vercel riconosce Django e serve i file statici.
+Quando il sito gira su Vercel (variabile `VERCEL` presente) la configurazione si adatta da sola:
+
+- il debug è disattivato;
+- sono consentiti i domini `*.vercel.app` del progetto, comprese le anteprime;
+- Django riconosce l'HTTPS gestito da Vercel, quindi il form di prenotazione supera il controllo CSRF;
+- le sessioni sono salvate in un cookie firmato, perché su Vercel il database SQLite non è disponibile.
+
+Nelle impostazioni del progetto su Vercel (**Settings → Environment Variables**) imposta `DJANGO_SECRET_KEY`
+con una chiave casuale, generabile con:
+
+```powershell
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+Se usi un dominio personalizzato, aggiungilo a `DJANGO_ALLOWED_HOSTS` (es. `www.miocinema.it`).
 La pagina 404 personalizzata è visibile solo con il debug disattivato, ad esempio:
 
 ```powershell
