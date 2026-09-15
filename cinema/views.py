@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 def home(request):
-    """Homepage: elenco dei film in programmazione."""
     films = []
     error = None
     try:
@@ -26,7 +25,6 @@ def home(request):
 
 
 def film_detail(request):
-    """Dettaglio film con l'elenco dei prossimi spettacoli."""
     film_id = request.GET.get('id', '')
     if not film_id.isdigit():
         raise Http404('Film non trovato')
@@ -48,7 +46,6 @@ def film_detail(request):
 
 
 def booking(request, screening_id):
-    """Prenotazione di un posto: riepilogo dello spettacolo e form con i dati dello spettatore."""
     try:
         screening = services.get_screening(screening_id)
     except services.NotFoundError:
@@ -80,7 +77,6 @@ def booking(request, screening_id):
                 'hall': screening['hall']['name'],
                 'starts_at': screening['starts_at'].isoformat(),
             }
-            # Redirect dopo il POST: ricaricando la pagina non si invia una seconda prenotazione
             return redirect('cinema:booking_success')
 
     return render(request, 'cinema/booking.html', {
@@ -91,7 +87,6 @@ def booking(request, screening_id):
 
 
 def booking_success(request):
-    """Conferma dell'ultima prenotazione effettuata nella sessione corrente."""
     last_booking = request.session.get('last_booking')
     if not last_booking:
         return redirect('cinema:home')
@@ -101,7 +96,6 @@ def booking_success(request):
 
 
 def _group_upcoming_by_day(screenings):
-    """Scarta gli spettacoli già iniziati e raggruppa gli altri per giorno (ora locale), in ordine cronologico."""
     now = timezone.now()
     upcoming = sorted(
         (s for s in screenings if s.get('starts_at') and s['starts_at'] >= now),
@@ -117,7 +111,6 @@ def _group_upcoming_by_day(screenings):
 
 
 def _seats_status(screening):
-    """Disponibilità dei posti: 'sold_out', 'low' (10% o meno della capienza) oppure 'available'."""
     available = screening['available_seats']
     if available <= 0:
         return 'sold_out'
@@ -127,7 +120,6 @@ def _seats_status(screening):
 
 
 def _add_api_errors(form, exc):
-    """Riporta sul form gli errori restituiti dall'API, sul singolo campo quando indicato."""
     if not exc.details:
         form.add_error(None, exc.message)
     for field, message in exc.details.items():

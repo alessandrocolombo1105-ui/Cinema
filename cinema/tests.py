@@ -178,7 +178,6 @@ class FilmDetailViewTests(SimpleTestCase):
         days = response.context['screening_days']
         self.assertEqual([s['id'] for day in days for s in day['screenings']], [3, 1, 4])
 
-        # Solo gli spettacoli con posti liberi sono prenotabili
         self.assertContains(response, reverse('cinema:booking', args=[1]))
         self.assertNotContains(response, reverse('cinema:booking', args=[3]))
 

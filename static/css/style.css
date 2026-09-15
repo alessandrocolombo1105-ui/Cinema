@@ -1,10 +1,7 @@
-/* Stili personalizzati ITS Cinema (in aggiunta a Bootstrap 5) */
-
 .hero {
   background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), transparent 60%);
 }
 
-/* Locandine in formato 2:3 */
 .film-poster {
   --bs-aspect-ratio: 150%;
 }
@@ -15,7 +12,6 @@
   font-size: 4rem;
 }
 
-/* Pagina di dettaglio: su mobile la locandina non occupa tutta la larghezza */
 .detail-poster {
   max-width: 280px;
 }
@@ -30,7 +26,6 @@
   border-left: 4px solid var(--bs-warning);
 }
 
-/* Riepilogo dello spettacolo nella pagina di prenotazione */
 .summary-poster {
   width: 96px;
 }

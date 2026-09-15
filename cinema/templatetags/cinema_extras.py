@@ -5,7 +5,6 @@ register = template.Library()
 
 @register.filter
 def durata(minutes):
-    """Formatta una durata espressa in minuti: 94 -> "1 h 34 min"."""
     try:
         minutes = int(minutes)
     except (TypeError, ValueError):
