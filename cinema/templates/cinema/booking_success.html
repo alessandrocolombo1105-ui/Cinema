@@ -3,42 +3,73 @@
 {% block title %}Prenotazione confermata &middot; ITS Cinema{% endblock %}
 
 {% block content %}
+<div class="confetti" data-confetti aria-hidden="true"></div>
+
 <div class="container py-5">
   <div class="row justify-content-center">
-    <div class="col-12 col-md-10 col-lg-7">
+    <div class="col-12 col-md-10 col-lg-8">
+
+      <ol class="stepper justify-content-center">
+        <li class="is-done">Spettacolo</li>
+        <li class="is-done">I tuoi dati</li>
+        <li class="is-active">Conferma</li>
+      </ol>
+
       <div class="text-center mb-4">
-        <i class="bi bi-check-circle-fill display-3 text-success"></i>
+        <span class="success-mark"><i class="bi bi-check-lg"></i></span>
         <h1 class="h2 fw-bold mt-3">Prenotazione confermata!</h1>
         <p class="text-body-secondary mb-0">Grazie {{ booking.first_name }}, il tuo posto è riservato.</p>
       </div>
 
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Codice prenotazione</span>
-          <span class="badge text-bg-warning fs-6">#{{ booking.id }}</span>
+      <div class="ticket reveal">
+        <div class="ticket-main">
+          <p class="ticket-label mb-1">Film</p>
+          <h2 class="h4 mb-3">{{ booking.film_title }}</h2>
+          <div class="row g-3">
+            <div class="col-6 col-sm-4">
+              <p class="ticket-label mb-1">Data</p>
+              <p class="mb-0">{{ booking.starts_at|date:"l j F Y" }}</p>
+            </div>
+            <div class="col-6 col-sm-4">
+              <p class="ticket-label mb-1">Orario</p>
+              <p class="mb-0">{{ booking.starts_at|time:"H:i" }}</p>
+            </div>
+            <div class="col-6 col-sm-4">
+              <p class="ticket-label mb-1">Sala</p>
+              <p class="mb-0">{{ booking.hall }}</p>
+            </div>
+            <div class="col-6 col-sm-4">
+              <p class="ticket-label mb-1">Intestatario</p>
+              <p class="mb-0">{{ booking.first_name }} {{ booking.last_name }}</p>
+            </div>
+            <div class="col-12 col-sm-8">
+              <p class="ticket-label mb-1">Email</p>
+              <p class="mb-0 text-break">{{ booking.email }}</p>
+            </div>
+          </div>
         </div>
-        <div class="card-body">
-          <dl class="row mb-0">
-            <dt class="col-sm-4">Film</dt>
-            <dd class="col-sm-8">{{ booking.film_title }}</dd>
-            <dt class="col-sm-4">Data</dt>
-            <dd class="col-sm-8">{{ booking.starts_at|date:"l j F Y" }}</dd>
-            <dt class="col-sm-4">Orario</dt>
-            <dd class="col-sm-8">{{ booking.starts_at|time:"H:i" }}</dd>
-            <dt class="col-sm-4">Sala</dt>
-            <dd class="col-sm-8">{{ booking.hall }}</dd>
-            <dt class="col-sm-4">Intestatario</dt>
-            <dd class="col-sm-8">{{ booking.first_name }} {{ booking.last_name }}</dd>
-            <dt class="col-sm-4">Email</dt>
-            <dd class="col-sm-8 text-break mb-0">{{ booking.email }}</dd>
-          </dl>
+
+        <div class="ticket-stub">
+          <span class="ticket-label-dark">Codice</span>
+          <span class="stub-code">#{{ booking.id }}</span>
+          <i class="bi bi-ticket-perforated fs-3"></i>
         </div>
       </div>
 
       <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center mt-4">
-        <a href="{% url 'cinema:film_detail' %}?id={{ booking.film_id }}" class="btn btn-outline-warning">Torna al film</a>
-        <a href="{% url 'cinema:home' %}" class="btn btn-warning">Torna alla programmazione</a>
+        <button type="button" class="btn btn-outline-accent" data-copy="{{ booking.id }}">
+          <i class="bi bi-clipboard me-2"></i>Copia il codice
+        </button>
+        <a href="{% url 'cinema:booking_ticket' %}" class="btn btn-outline-accent">
+          <i class="bi bi-calendar-plus me-2"></i>Aggiungi al calendario
+        </a>
       </div>
+
+      <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center mt-3">
+        <a href="{% url 'cinema:film_detail' %}?id={{ booking.film_id }}" class="btn btn-link link-secondary">Torna al film</a>
+        <a href="{% url 'cinema:home' %}" class="btn btn-accent">Torna alla programmazione</a>
+      </div>
+
     </div>
   </div>
 </div>

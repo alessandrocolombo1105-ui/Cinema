@@ -4,7 +4,7 @@
 {% block title %}Prenotazione{% if screening %} &middot; {{ screening.film.title }}{% endif %} &middot; ITS Cinema{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container py-4 py-lg-5">
   {% if error %}
     <a href="{% url 'cinema:home' %}" class="btn btn-link link-secondary px-0 mb-3">
       <i class="bi bi-arrow-left me-1"></i>Torna alla programmazione
@@ -17,44 +17,56 @@
       <i class="bi bi-arrow-left me-1"></i>Torna a {{ screening.film.title }}
     </a>
 
-    <h1 class="h2 fw-bold mb-4">Prenota il tuo posto</h1>
+    <h1 class="h2 fw-bold mb-3">Prenota il tuo posto</h1>
+
+    <ol class="stepper">
+      <li class="is-done">Spettacolo</li>
+      <li class="is-active">I tuoi dati</li>
+      <li>Conferma</li>
+    </ol>
 
     <div class="row g-4">
       <div class="col-12 col-lg-5">
-        <aside class="card h-100" aria-label="Riepilogo dello spettacolo">
-          <div class="card-body d-flex gap-3">
-            <div class="ratio film-poster summary-poster flex-shrink-0 align-self-start rounded overflow-hidden">
-              {% if screening.film.poster_url %}
-                <img src="{{ screening.film.poster_url }}" class="object-fit-cover"
-                     alt="Locandina di {{ screening.film.title }}" referrerpolicy="no-referrer">
-              {% else %}
-                <div class="poster-placeholder d-flex align-items-center justify-content-center">
-                  <i class="bi bi-film"></i>
-                </div>
-              {% endif %}
+        <aside class="card booking-summary reveal" aria-label="Riepilogo dello spettacolo">
+          <div class="card-body">
+            <div class="d-flex gap-3">
+              <div class="ratio film-poster summary-poster flex-shrink-0 align-self-start rounded overflow-hidden">
+                {% if screening.film.poster_url %}
+                  <img src="{{ screening.film.poster_url }}" class="object-fit-cover"
+                       alt="Locandina di {{ screening.film.title }}" referrerpolicy="no-referrer">
+                {% else %}
+                  <div class="poster-placeholder d-flex align-items-center justify-content-center">
+                    <i class="bi bi-film"></i>
+                  </div>
+                {% endif %}
+              </div>
+
+              <div>
+                <h2 class="h5 mb-1">{{ screening.film.title }}</h2>
+                <p class="small text-body-secondary mb-2">
+                  {{ screening.film.genre }} &middot; {{ screening.film.duration|durata }}
+                </p>
+                {% if is_bookable %}
+                  <span class="countdown countdown-sm" data-countdown="{{ screening.starts_at|date:'c' }}"></span>
+                {% endif %}
+              </div>
             </div>
 
-            <div>
-              <h2 class="h5 mb-1">{{ screening.film.title }}</h2>
-              <p class="small text-body-secondary mb-3">
-                {{ screening.film.genre }} &middot; {{ screening.film.duration|durata }}
-              </p>
-              <ul class="list-unstyled small mb-0">
-                <li class="mb-2"><i class="bi bi-calendar-event text-warning me-2"></i>{{ screening.starts_at|date:"l j F Y" }}</li>
-                <li class="mb-2"><i class="bi bi-clock text-warning me-2"></i>Ore {{ screening.starts_at|time:"H:i" }}</li>
-                <li class="mb-2"><i class="bi bi-door-open text-warning me-2"></i>{{ screening.hall.name }}</li>
-                <li>
-                  <i class="bi bi-person text-warning me-2"></i>{{ screening.available_seats }}
-                  post{{ screening.available_seats|pluralize:"o,i" }} disponibil{{ screening.available_seats|pluralize:"e,i" }}
-                </li>
-              </ul>
-            </div>
+            <ul class="list-unstyled summary-list mt-3 mb-0">
+              <li><i class="bi bi-calendar-event text-accent"></i>{{ screening.starts_at|date:"l j F Y" }}</li>
+              <li><i class="bi bi-clock text-accent"></i>Ore {{ screening.starts_at|time:"H:i" }}</li>
+              <li><i class="bi bi-door-open text-accent"></i>{{ screening.hall.name }}</li>
+              <li>
+                <i class="bi bi-person text-accent"></i>{{ screening.available_seats }}
+                post{{ screening.available_seats|pluralize:"o,i" }} disponibil{{ screening.available_seats|pluralize:"e,i" }}
+              </li>
+            </ul>
           </div>
         </aside>
       </div>
 
       <div class="col-12 col-lg-7">
-        <section class="card h-100" aria-labelledby="booking-form-title">
+        <section class="card h-100 reveal" style="--delay: .08s" aria-labelledby="booking-form-title">
           <div class="card-body p-4">
             <h2 id="booking-form-title" class="h5 mb-3">I tuoi dati</h2>
 
@@ -62,7 +74,7 @@
               <div class="alert alert-warning" role="alert">
                 <i class="bi bi-info-circle me-2"></i>Questo spettacolo non è più prenotabile: i posti sono esauriti oppure è già iniziato.
               </div>
-              <a href="{% url 'cinema:film_detail' %}?id={{ screening.film.id }}" class="btn btn-outline-warning">
+              <a href="{% url 'cinema:film_detail' %}?id={{ screening.film.id }}" class="btn btn-outline-accent">
                 Scegli un altro spettacolo
               </a>
             {% else %}
@@ -87,9 +99,12 @@
                   {% endfor %}
                 </div>
 
-                <button type="submit" class="btn btn-warning btn-lg w-100 mt-4">
+                <button type="submit" class="btn btn-accent btn-lg w-100 mt-4">
                   <i class="bi bi-ticket-perforated me-2"></i>Conferma prenotazione
                 </button>
+                <p class="small text-body-secondary text-center mt-3 mb-0">
+                  <i class="bi bi-shield-check me-1"></i>Il posto viene riservato subito, senza pagamento online.
+                </p>
               </form>
             {% endif %}
           </div>

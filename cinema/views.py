@@ -1,7 +1,8 @@
 import logging
+from datetime import timedelta, timezone as dt_timezone
 from itertools import groupby
 
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -21,7 +22,8 @@ def home(request):
         logger.warning('Errore nel recupero dei film: %s', exc)
         error = 'Al momento non riusciamo a caricare la programmazione. Riprova tra qualche minuto.'
 
-    return render(request, 'cinema/home.html', {'films': films, 'error': error})
+    genres = sorted({film['genre'] for film in films if film.get('genre')})
+    return render(request, 'cinema/home.html', {'films': films, 'error': error, 'genres': genres})
 
 
 def film_detail(request):
@@ -39,9 +41,11 @@ def film_detail(request):
         context = {'error': 'Al momento non riusciamo a caricare le informazioni del film. Riprova tra qualche minuto.'}
         return render(request, 'cinema/film_detail.html', context, status=503)
 
+    screening_days = _group_upcoming_by_day(screenings)
     return render(request, 'cinema/film_detail.html', {
         'film': film,
-        'screening_days': _group_upcoming_by_day(screenings),
+        'screening_days': screening_days,
+        'next_screening': _first_bookable(screening_days),
     })
 
 
@@ -74,6 +78,7 @@ def booking(request, screening_id):
                 **form.cleaned_data,
                 'film_id': screening['film']['id'],
                 'film_title': screening['film']['title'],
+                'duration': screening['film'].get('duration'),
                 'hall': screening['hall']['name'],
                 'starts_at': screening['starts_at'].isoformat(),
             }
@@ -95,6 +100,43 @@ def booking_success(request):
     return render(request, 'cinema/booking_success.html', {'booking': last_booking})
 
 
+def booking_ticket(request):
+    last_booking = request.session.get('last_booking')
+    if not last_booking:
+        return redirect('cinema:home')
+
+    start = parse_datetime(last_booking['starts_at'])
+    end = start + timedelta(minutes=last_booking.get('duration') or 120)
+    holder = f"{last_booking['first_name']} {last_booking['last_name']}"
+    calendar = '\r\n'.join([
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//ITS Cinema//Prenotazioni//IT',
+        'BEGIN:VEVENT',
+        f"UID:prenotazione-{last_booking['id']}@its-cinema",
+        f'DTSTAMP:{_ics_datetime(timezone.now())}',
+        f'DTSTART:{_ics_datetime(start)}',
+        f'DTEND:{_ics_datetime(end)}',
+        f"SUMMARY:{_ics_text(last_booking['film_title'])} - ITS Cinema",
+        f"LOCATION:{_ics_text(last_booking['hall'])}",
+        f"DESCRIPTION:Prenotazione {last_booking['id']} a nome {_ics_text(holder)}",
+        'END:VEVENT',
+        'END:VCALENDAR',
+    ])
+
+    response = HttpResponse(calendar, content_type='text/calendar; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="its-cinema.ics"'
+    return response
+
+
+def _ics_datetime(value):
+    return value.astimezone(dt_timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+
+
+def _ics_text(value):
+    return str(value).replace('\\', '\\\\').replace(';', '\\;').replace(',', '\\,').replace('\n', '\\n')
+
+
 def _group_upcoming_by_day(screenings):
     now = timezone.now()
     upcoming = sorted(
@@ -103,6 +145,7 @@ def _group_upcoming_by_day(screenings):
     )
     for screening in upcoming:
         screening['seats_status'] = _seats_status(screening)
+        screening['seats_percent'] = _seats_percent(screening)
 
     return [
         {'date': day, 'screenings': list(items)}
@@ -117,6 +160,21 @@ def _seats_status(screening):
     if available <= screening['hall']['capacity'] * 0.1:
         return 'low'
     return 'available'
+
+
+def _seats_percent(screening):
+    capacity = screening['hall'].get('capacity') or 0
+    if not capacity:
+        return 0
+    return max(0, min(100, round(screening['available_seats'] / capacity * 100)))
+
+
+def _first_bookable(screening_days):
+    for day in screening_days:
+        for screening in day['screenings']:
+            if screening['seats_status'] != 'sold_out':
+                return screening
+    return None
 
 
 def _add_api_errors(form, exc):

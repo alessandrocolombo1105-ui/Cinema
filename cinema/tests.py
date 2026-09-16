@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from . import services
-from .templatetags.cinema_extras import durata
+from .templatetags.cinema_extras import durata, stagger
 
 API_URL = settings.CINEMA_API_BASE_URL
 TIMEOUT = settings.CINEMA_API_TIMEOUT
@@ -122,6 +122,11 @@ class DurataFilterTests(SimpleTestCase):
         self.assertEqual(durata(45), '45 min')
         self.assertEqual(durata(None), '')
 
+    def test_stagger_delays(self):
+        self.assertEqual(stagger(0), '0.00')
+        self.assertEqual(stagger(3), '0.18')
+        self.assertEqual(stagger(None), '0')
+
 
 class HomeViewTests(SimpleTestCase):
     @patch('cinema.services.get_films', return_value=[FILM])
@@ -131,6 +136,8 @@ class HomeViewTests(SimpleTestCase):
         self.assertContains(response, 'Oppenheimer')
         self.assertContains(response, 'Scopri di più')
         self.assertContains(response, f"{reverse('cinema:film_detail')}?id=1")
+        self.assertEqual(response.context['genres'], ['Biografico'])
+        self.assertContains(response, 'data-film-search')
 
     @patch('cinema.services.get_films', side_effect=services.CinemaAPIError('offline'))
     def test_home_shows_error_when_api_fails(self, _):
@@ -180,6 +187,9 @@ class FilmDetailViewTests(SimpleTestCase):
 
         self.assertContains(response, reverse('cinema:booking', args=[1]))
         self.assertNotContains(response, reverse('cinema:booking', args=[3]))
+
+        self.assertEqual(response.context['next_screening']['id'], 1)
+        self.assertEqual(response.context['next_screening']['seats_percent'], 67)
 
     @patch('cinema.services.get_film_screenings', return_value=[])
     @patch('cinema.services.get_film', return_value=FILM)
@@ -283,5 +293,24 @@ class BookingViewTests(TestCase):
 
     def test_confirmation_without_booking_redirects_home(self):
         response = self.client.get(reverse('cinema:booking_success'))
+
+        self.assertRedirects(response, reverse('cinema:home'), fetch_redirect_response=False)
+
+    @patch('cinema.services.create_booking', return_value={'id': 42, 'screening_id': 10, **BOOKING_DATA})
+    def test_ticket_returns_calendar_file(self, _):
+        self.client.post(self.url, BOOKING_DATA)
+
+        response = self.client.get(reverse('cinema:booking_ticket'))
+        content = response.content.decode()
+
+        self.assertEqual(response['Content-Type'], 'text/calendar; charset=utf-8')
+        self.assertIn('attachment', response['Content-Disposition'])
+        self.assertIn('BEGIN:VCALENDAR', content)
+        self.assertIn('SUMMARY:Oppenheimer - ITS Cinema', content)
+        self.assertIn('LOCATION:Sala IMAX', content)
+        self.assertIn('UID:prenotazione-42@its-cinema', content)
+
+    def test_ticket_without_booking_redirects_home(self):
+        response = self.client.get(reverse('cinema:booking_ticket'))
 
         self.assertRedirects(response, reverse('cinema:home'), fetch_redirect_response=False)

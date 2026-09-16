@@ -17,6 +17,8 @@ Indirizzo: `/` · API usata: `GET /films`
   e un estratto della trama.
 - La durata è mostrata in ore e minuti (es. "2 h 46 min").
 - Ogni scheda ha il pulsante **"Scopri di più"**, che apre il dettaglio del film.
+- Una barra strumenti permette di **cercare** per titolo o regista, **filtrare per genere** e **ordinare**
+  i risultati per titolo, anno o durata, con il conteggio dei film trovati.
 
 ### 2. Dettaglio del film
 
@@ -31,6 +33,9 @@ Indirizzo: `/film/?id=<id del film>` · API usate: `GET /films/{id}` e `GET /fil
   - **Disponibile**;
   - **Ultimi posti**, quando resta libero il 10% della capienza o meno;
   - **Esaurito**, quando non ci sono più posti.
+- In evidenza il **prossimo spettacolo disponibile**, con il conto alla rovescia all'inizio della proiezione.
+- Gli spettacoli si possono filtrare per giorno o mostrare solo quelli con posti liberi.
+- Una barra colorata indica a colpo d'occhio quanti posti restano.
 - Gli spettacoli con posti liberi hanno il pulsante **"Prenota"**; quelli esauriti no.
 - Se il film non ha spettacoli in programma viene mostrato un avviso.
 
@@ -53,7 +58,9 @@ Indirizzo: `/prenota/<id dello spettacolo>/` · API usate: `GET /screenings/{id}
 
 Indirizzo: `/prenota/conferma/`
 
-- Mostra il **codice della prenotazione** e il riepilogo: film, data, orario, sala, intestatario ed email.
+- Mostra il **codice della prenotazione** e il riepilogo: film, data, orario, sala, intestatario ed email,
+  con la grafica di un biglietto del cinema.
+- Il codice si può copiare con un clic e lo spettacolo si può salvare nel calendario (file `.ics`).
 - Ricaricare la pagina non crea una seconda prenotazione.
 - Se la pagina viene aperta senza aver prenotato, l'utente viene riportato alla programmazione.
 
@@ -61,6 +68,9 @@ Indirizzo: `/prenota/conferma/`
 
 - **Responsive**: il layout, basato su Bootstrap 5, si adatta a smartphone, tablet e desktop
   (su schermi piccoli il menu diventa a scomparsa e le schede si dispongono in colonna).
+- **Animazioni**: gli elementi compaiono man mano che si scorre la pagina, le locandine si ingrandiscono
+  al passaggio del mouse e la conferma della prenotazione è accompagnata dai coriandoli.
+  Tutte le animazioni si disattivano se il sistema operativo richiede meno movimento.
 - **Gestione degli errori**:
   - se l'API non è raggiungibile, le pagine mostrano un messaggio invece di bloccarsi;
   - un film o uno spettacolo inesistente, o un indirizzo non valido, portano alla pagina "Pagina non trovata";

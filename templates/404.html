@@ -3,10 +3,12 @@
 {% block title %}Pagina non trovata &middot; ITS Cinema{% endblock %}
 
 {% block content %}
-<div class="container py-5 text-center">
-  <i class="bi bi-camera-reels display-1 text-warning"></i>
-  <h1 class="display-6 fw-bold mt-3">Pagina non trovata</h1>
-  <p class="text-body-secondary">Il contenuto che cerchi non esiste o non è più disponibile.</p>
-  <a href="{% url 'cinema:home' %}" class="btn btn-warning">Torna alla programmazione</a>
+<div class="container py-5">
+  <div class="empty-state error-state mx-auto">
+    <i class="bi bi-camera-reels display-1 text-accent d-block mb-3"></i>
+    <h1 class="h2 fw-bold">Pagina non trovata</h1>
+    <p class="text-body-secondary">Il contenuto che cerchi non esiste o non è più disponibile.</p>
+    <a href="{% url 'cinema:home' %}" class="btn btn-accent mt-2">Torna alla programmazione</a>
+  </div>
 </div>
 {% endblock %}
